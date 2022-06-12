@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>学生选课情况</title>
+    <div th:replace="common::css"></div>
+    <div th:replace="common::js"></div>
+</head>
+<body>
+<div th:replace="common::nav"></div>
+<div class="layui-fluid">
+    <div class="layui-row" style="margin-top: 15px;">
+        <div class="layui-col-md2">
+            <div th:replace="common::menu"></div>
+        </div>
+        <div class="layui-col-md10" style="padding-left: 15px;">
+            <div class="layui-panel" style="padding: 15px;">
+                <table id="table_course_situ" lay-filter="table_course_situ"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    layui.use(['table', 'util', 'dropdown', 'jquery', 'layer', 'form'], function () {
+        let table = layui.table;
+        let util = layui.util;
+        let dropdown = layui.dropdown;
+        let jquery = layui.jquery;
+        let layer = layui.layer;
+        let form = layui.form;
+
+        table.render({
+            elem: '#table_course_situ'
+            // , height: 312
+            , url: '/course/situ' //数据接口
+            , method: 'post'
+            , page: true //开启分页
+            , limit: 6
+            , request: {
+                pageName: 'currPage' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , loading: true
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', sort: true}
+                , {field: 'name', title: '姓名'}
+                , {field: 'username', title: '学号'}
+                , {field: 'college', title: '学院'}
+                , {field: 'major', title: '专业'}
+                , {
+                    field: 'courses',
+                    title: '选课数',
+                    templet: function (d) {
+                        console.log(d.courses.length)
+                        return '<a id="course_detail" href="javascript:void(0);">' + d.courses.length + '</a>'
+                    }
+                }
+            ]]
+        });
+
+        //触发行单击事件
+        table.on('row(table_course_situ)', function (obj) {
+            console.log(obj.data) //得到当前行数据
+            console.log(obj.data.id)
+
+            table.reload('course_detail', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                , where: {
+                    id:obj.data.id
+                }
+            });
+
+            // table.render({
+            //     elem: '#course_detail'
+            //     , url: '/course/detail' //数据接口
+            //     , method: 'post'
+            //     , page: false //开启分页
+            //     ,where:{
+            //         id:obj.data.id
+            //     }
+            //     , loading: true
+            //     , cols: [[ //表头
+            //         {field: 'id', title: 'ID', sort: true}
+            //         , {field: 'name', title: '课程名'}
+            //         , {field: 'teacherName', title: '授课老师'}
+            //         , {field: 'classroom', title: '教室'}
+            //         , {field: 'week', title: '星期'}
+            //         , {field: 'section', title: '时间'}
+            //     ]]
+            // });
+
+            layer.open({
+                type: 1,//重要
+                area: ['660px', '400px'],
+                title: '课程详情',
+                resize: true,
+                content: jquery('#detail')
+            });
+        });
+
+    });
+</script>
+<div id="detail" style="display: none">
+    <table id="course_detail" lay-filter="course_detail"></table>
+</div>
+
+<script th:inline="javascript">
+    layui.use('table', function(){
+        var table = layui.table;
+
+        table.render({
+            elem: '#course_detail'
+            , url: '/course/detail' //数据接口
+            , method: 'post'
+            , page: true //开启分页
+            , limit: 6
+            , request: {
+                pageName: 'currPage' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            ,where:{
+                id:0
+            }
+            , loading: true
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', sort: true}
+                , {field: 'name', title: '课程名'}
+                , {field: 'teacherName', title: '授课老师'}
+                , {field: 'classroom', title: '教室'}
+                , {field: 'week', title: '星期'}
+                , {field: 'section', title: '时间'}
+            ]]
+        });
+
+    });
+</script>
+</body>
+</html>

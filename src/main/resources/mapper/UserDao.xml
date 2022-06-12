@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yimin.course.dao.UserDao">
+
+    <resultMap type="com.yimin.course.entity.User" id="UserMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="college" column="college" jdbcType="VARCHAR"/>
+        <result property="major" column="major" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="sex" column="sex" jdbcType="INTEGER"/>
+        <result property="role" column="role" jdbcType="INTEGER"/>
+        <association property="courses" column="id" select="getCourse"/>
+    </resultMap>
+
+    <select id="selectUserByNamePwd" resultMap="UserMap">
+        select * from t_user where username=#{username} and password=#{password}
+    </select>
+
+    <!--学生选课情况-->
+    <!--注意这里的t_student_course.course_id，不要写错了，出bug找了半天-->
+    <select id="getCourse" resultType="com.yimin.course.entity.Course">
+        select t_student_course.course_id id from t_student_course where student_id = #{id}
+    </select>
+    <select id="selectCourseSitu" resultMap="UserMap">
+        select * from t_user where role=2 group by name
+    </select>
+    <select id="selectOneCourseSitu" resultMap="UserMap">
+        select * from t_user where id=#{id}
+    </select>
+
+</mapper>
+

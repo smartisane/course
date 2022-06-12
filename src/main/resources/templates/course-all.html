@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>所有课程</title>
+    <div th:replace="common::css"></div>
+    <div th:replace="common::js"></div>
+</head>
+<body>
+<div th:replace="common::nav"></div>
+<div class="layui-fluid">
+    <div class="layui-row" style="margin-top: 15px;">
+        <div class="layui-col-md2">
+            <div th:replace="common::menu"></div>
+        </div>
+        <div class="layui-col-md10" style="padding-left: 15px;">
+            <div class="layui-panel" style="padding: 15px;">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label" style="width: 100px;">课程名</label>
+                            <div class="layui-input-inline" style="width: 140px;">
+                                <input type="text" name="name" placeholder="请输入课程名" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+
+                            <label class="layui-form-label" style="width: 100px;">课程类型</label>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="type">
+                                    <option value="">选择</option>
+                                    <option value="必修">必修</option>
+                                    <option value="选修">选修</option>
+                                </select>
+                            </div>
+
+                            <label class="layui-form-label" style="width: 70px;">星期</label>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="week">
+                                    <option value="">选择</option>
+                                    <option value="周一">周一</option>
+                                    <option value="周二">周二</option>
+                                    <option value="周三">周三</option>
+                                    <option value="周四">周四</option>
+                                    <option value="周五">周五</option>
+                                    <option value="周六">周六</option>
+                                    <option value="周日">周日</option>
+                                </select>
+                            </div>
+
+                            <label class="layui-form-label" style="width: 70px;">时间</label>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="section">
+                                    <option value="">选择</option>
+                                    <option value="12">12</option>
+                                    <option value="34">34</option>
+                                    <option value="56">56</option>
+                                    <option value="78">78</option>
+                                    <option value="910">910</option>
+                                </select>
+                            </div>
+
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <button class="layui-btn" lay-submit lay-filter="searchCourse">搜索课程</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <table id="table_course" lay-filter="table_course"></table>
+            </div>
+            <script type="text/html" id="bar">
+                <a class="layui-btn layui-btn-xs" lay-event="choose">选课</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="withdraw">退课</a>
+            </script>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    layui.use(['table', 'util', 'dropdown', 'jquery', 'layer', 'form'], function () {
+        let table = layui.table;
+        let util = layui.util;
+        let dropdown = layui.dropdown;
+        let jquery = layui.jquery;
+        let layer = layui.layer;
+        let form = layui.form;
+
+        //搜索课程
+        form.on('submit(searchCourse)', function (data) {
+            layer.msg(JSON.stringify(data.field));
+            table.reload('table_course', {
+                url: '/course/search' //数据接口
+                , page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                , where: {
+                    name:data.field.name,
+                    type:data.field.type,
+                    week:data.field.week,
+                    section:data.field.section
+                }
+            });
+            return false;
+        });
+
+
+        //第一个实例
+        table.render({
+            elem: '#table_course'
+            // , height: 312
+            , url: '/course/all' //数据接口
+            , method: 'post'
+            , page: true //开启分页
+            , limit: 6
+            , request: {
+                pageName: 'currPage' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , loading: true
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', hide: true}
+                , {
+                    field: 'students',
+                    title: '选课状态',
+                    width: 90,
+                    templet: function (d) {
+                        //students是所有选这门课的学生列表
+                        console.log("d.students", d.students)
+                        for (let i = 0; i < d.students.length; i++) {
+                            console.log("student.id", d.students[i].id)
+                            if ([[${id}]] === d.students[i].id) return '<span style="color: green">已选</span>'
+                        }
+                        return '<span style="color: red">未选</span>';
+                    }
+
+                }
+                , {field: 'name', title: '课程名', width: 200}
+                , {field: 'type', title: '课程类型', width: 90}
+                , {field: 'teacherName', title: '授课老师', width: 90}
+                // , {
+                //     field: 'createTime',
+                //     title: '创建时间',
+                //     width: 120,
+                //     templet: function (d) {
+                //         return util.toDateString(d.createTime, "yyyy-MM-dd");
+                //     }
+                // }
+                , {field: 'total', title: '限选人数', width: 90}
+                , {field: 'choose', title: '已选人数', width: 90}
+                , {field: 'classroom', title: '教室', width: 90}
+                , {field: 'week', title: '星期', width: 70}
+                , {field: 'section', title: '节次', width: 60}
+                // , {field: 'option', title: '操作', toolbar: '#bar'}
+                , {
+                    field: 'option',
+                    title: '操作',
+                    // toolbar: '#bar',
+                    // templet: function (d) {
+                    //     //students是所有选这门课的学生列表
+                    //     for (let student in d.students) {
+                    //         if([[${id}]]===student.id) return '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="withdraw">退课</a>'
+                    //     }
+                    //     return ' <a class="layui-btn layui-btn-xs" lay-event="choose">选课</a>';
+                    // },
+                    templet: function (d) {
+                        //students是所有选这门课的学生列表
+                        console.log("d.students", d.students)
+                        for (let i = 0; i < d.students.length; i++) {
+                            console.log("student.id", d.students[i].id)
+                            if ([[${id}]] === d.students[i].id) return '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="withdraw">退课</a>'
+                        }
+                        return ' <a class="layui-btn layui-btn-xs" lay-event="choose">选课</a>';
+                    }
+                }
+            ]]
+        });
+
+        //监听行工具事件
+        table.on('tool(table_course)', function (obj) {
+            var data = obj.data;
+            console.log('data', data)
+            if (obj.event === 'choose') {
+                // layer.msg("选课")
+                layer.confirm('确认选课?', {icon: 3, title: '提示'}, function (index) {
+                    // ajax begin=============
+                    jquery.ajax({
+                        type: "POST",
+                        url: "/studentCourse/choose",
+                        async: false,
+                        // contentType: 'application/json',
+                        // data: JSON.stringify(data.field),
+                        data: {
+                            courseId: data.id,//课程id
+                            studentId: [[${id}]]//学生id
+                        },
+                        success: function (res) {
+                            if (res.code === 200) {
+                                layer.msg(res.msg);
+                                setTimeout(function () {
+                                    window.location.reload()
+                                }, 1500)
+                            } else {
+                                layer.msg(res.msg);
+                            }
+                        },
+                        error: function (err) {
+                            console.log("err", err)
+                        }
+                    });
+                    // ajax end==================
+                    layer.close(index);
+                });
+
+
+            } else if (obj.event === 'withdraw') {
+                // layer.msg("退课")
+                layer.confirm('确认退课?', {icon: 3, title: '提示'}, function (index) {
+                    // ajax begin=============
+                    jquery.ajax({
+                        type: "POST",
+                        url: "/studentCourse/withdraw",
+                        async: false,
+                        // contentType: 'application/json',
+                        // data: JSON.stringify(data.field),
+                        data: {
+                            courseId: data.id,//课程id
+                            studentId: [[${id}]]//学生id
+                        },
+                        success: function (res) {
+                            if (res.code === 200) {
+                                layer.msg(res.msg);
+                                setTimeout(function () {
+                                    window.location.reload()
+                                }, 1500)
+                            } else {
+                                layer.msg(res.msg);
+                            }
+                        },
+                        error: function (err) {
+                            console.log("err", err)
+                        }
+                    });
+                    // ajax end==================
+                    layer.close(index);
+                });
+
+            }
+        });
+
+    });
+</script>
+<form id="form_create_course" class="layui-form layui-form-pane" action="" style="display: none">
+    <div style="padding-top: 20px;padding-left: 20px;">
+        <!--已登录的教师id-->
+        <input type="hidden" name="teacherId" th:value="${id}">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">课程名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" lay-verify="required" autocomplete="on" class="layui-input">
+                </div>
+                <label class="layui-form-label">课程类型</label>
+                <div class="layui-input-inline">
+                    <select id="type" name="type" lay-verify="required">
+                        <option value="必修">必修</option>
+                        <option value="选修">选修</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">限选人数</label>
+                <div class="layui-input-inline">
+                    <input type="number" name="total" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+                <label class="layui-form-label">教室</label>
+                <div class="layui-input-inline">
+                    <select id="classroom" name="classroom" lay-verify="required">
+                        <option value="东教101">东教南101</option>
+                        <option value="东教101">东教南102</option>
+                        <option value="东教101">东教南103</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">上课时间</label>
+                <div class="layui-input-inline">
+                    <select id="week" name="week" lay-verify="required">
+                        <option value="周一">周一</option>
+                        <option value="周二">周二</option>
+                        <option value="周三">周三</option>
+                        <option value="周四">周四</option>
+                        <option value="周五">周五</option>
+                        <option value="周六">周六</option>
+                        <option value="周日">周日</option>
+                    </select>
+                </div>
+
+                <label class="layui-form-label">上课时间</label>
+                <div class="layui-input-inline">
+                    <select id="section" name="section" lay-verify="required">
+                        <option value="12">12</option>
+                        <option value="23">34</option>
+                        <option value="56">56</option>
+                        <option value="78">78</option>
+                        <option value="910">910</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">所属院系</label>
+                <div class="layui-input-inline">
+                    <select id="college" name="college" lay-verify="required">
+                        <option value="计算机科学与技术学院">计算机科学与技术学院</option>
+                        <option value="数理学院">数理学院</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button style="float: right;margin-right: 20px;" class="layui-btn" lay-submit
+                    lay-filter="submit_create_course">
+                创建
+            </button>
+
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form', 'jquery', 'layer'], function () {
+        var form = layui.form;
+        var jquery = layui.jquery;
+        var layer = layui.layer;
+
+        //监听提交
+        form.on('submit(submit_create_course)', function (data) {
+            // layer.msg(JSON.stringify(data.field));
+            jquery.ajax({
+                type: "POST",
+                url: "/course/add",
+                async: false,
+                // contentType: 'application/json',
+                // data: JSON.stringify(data.field),
+                data: data.field,
+                success: function (res) {
+                    if (res.code === 200) {
+                        layer.msg(res.msg);
+                        // setTimeout(function () {
+                        //     window.location.replace('/index')
+                        // }, 1500)
+
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                },
+                error: function (err) {
+                    console.log("err", err)
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

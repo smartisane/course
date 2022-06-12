@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <div th:replace="common::css"></div>
+    <div th:replace="common::js"></div>
+</head>
+<body>
+<div th:replace="common::nav"></div>
+<div class="layui-fluid">
+    <div class="layui-row" style="margin-top: 15px;">
+        <div class="layui-col-md2">
+            <div th:replace="common::menu"></div>
+        </div>
+        <div class="layui-col-md10" style="padding-left: 15px;">
+            <div class="layui-panel" style="padding: 15px;">
+                <button th:if="${role==0 || role==1}" class="layui-btn" id="btn_create_course">创建课程</button>
+                <table id="table_course" lay-filter="table_course"></table>
+            </div>
+            <script type="text/html" id="bar">
+                <a id="options" class="layui-btn layui-btn-xs" lay-event="more">操作 <i
+                        class="layui-icon layui-icon-down"></i></a>
+            </script>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    layui.use(['table', 'util', 'dropdown', 'jquery', 'layer'], function () {
+        let table = layui.table;
+        let util = layui.util;
+        let dropdown = layui.dropdown;
+        let jquery = layui.jquery;
+        let layer = layui.layer;
+
+        jquery("#btn_create_course").click(function () {
+            layer.open({
+                type: 1,//重要
+                title: '创建课程',
+                resize: true,
+                content: jquery('#form_create_course')
+            });
+        })
+
+        table.render({
+            elem: '#table_course'
+            // , height: 312
+            , url: '/course/my' //数据接口
+            , page: true //开启分页
+            , limit: 6
+            , where: {id: [[${id}]],role:[[${role}]]}
+            , request: {
+                pageName: 'currPage' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , loading: true
+            , title: '我创建的课程'
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', hide: true}
+                , {field: 'name', title: '课程名', width: 200}
+                , {field: 'type', title: '课程类型', width: 90}
+                , {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: 120,
+                    templet: function (d) {
+                        return util.toDateString(d.createTime, "yyyy-MM-dd");
+                    }
+                }
+                , {field: 'total', title: '限选人数', width: 90}
+                , {field: 'choose', title: '已选人数', width: 90}
+                , {field: 'classroom', title: '教室', width: 90}
+                , {field: 'week', title: '星期', width: 70}
+                , {field: 'section', title: '节次', width: 70}
+                , {field: 'option', title: '操作', toolbar: '#bar'}
+            ]]
+        });
+
+        //监听行工具事件
+        table.on('tool(table_course)', function (obj) {
+            var data = obj.data;
+            console.log('data', data)
+            if (obj.event === 'more') {
+                //更多下拉菜单
+                dropdown.render({
+                    elem: '#options'
+                    , show: true //外部事件触发即显示
+                    , data: [{
+                        title: '修改'
+                        , id: 'modify'
+                    }, {
+                        title: '删除'
+                        , id: 'delete'
+                    }]
+                    , click: function (data) {
+                        //根据 id 做出不同操作
+                        if (data.id === 'modify') {
+                            layer.msg("修改");
+
+                        } else if (data.id === 'delete') {
+                            layer.confirm('确认删除?', {icon: 3, title: '提示'}, function (index) {
+                                //do something
+                                layer.close(index);
+                            });
+                        }
+                    }
+                    , align: 'right' //右对齐弹出（v2.6.8 新增）
+                    , style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' //设置额外样式
+                });
+            }
+        });
+
+    });
+</script>
+<form id="form_create_course" class="layui-form layui-form-pane" action="" style="display: none">
+    <div style="padding-top: 20px;padding-left: 20px;">
+        <!--已登录的教师id-->
+        <input type="hidden" name="teacherId" th:value="${id}">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">课程名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" lay-verify="required" autocomplete="on" class="layui-input">
+                </div>
+                <label class="layui-form-label">课程类型</label>
+                <div class="layui-input-inline">
+                    <select id="type" name="type" lay-verify="required">
+                        <option value="必修">必修</option>
+                        <option value="选修">选修</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">限选人数</label>
+                <div class="layui-input-inline">
+                    <input type="number" name="total" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+                <label class="layui-form-label">教室</label>
+                <div class="layui-input-inline">
+                    <select id="classroom" name="classroom" lay-verify="required">
+                        <option value="东教101">东教南101</option>
+                        <option value="东教101">东教南102</option>
+                        <option value="东教101">东教南103</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">上课时间</label>
+                <div class="layui-input-inline">
+                    <select id="week" name="week" lay-verify="required">
+                        <option value="周一">周一</option>
+                        <option value="周二">周二</option>
+                        <option value="周三">周三</option>
+                        <option value="周四">周四</option>
+                        <option value="周五">周五</option>
+                        <option value="周六">周六</option>
+                        <option value="周日">周日</option>
+                    </select>
+                </div>
+
+                <label class="layui-form-label">上课时间</label>
+                <div class="layui-input-inline">
+                    <select id="section" name="section" lay-verify="required">
+                        <option value="12">12</option>
+                        <option value="34">34</option>
+                        <option value="56">56</option>
+                        <option value="78">78</option>
+                        <option value="910">910</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">所属院系</label>
+                <div class="layui-input-inline">
+                    <select id="college" name="college" lay-verify="required">
+                        <option value="计算机科学与技术学院">计算机科学与技术学院</option>
+                        <option value="数理学院">数理学院</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button style="float: right;margin-right: 20px;" class="layui-btn" lay-submit
+                    lay-filter="submit_create_course">
+                创建
+            </button>
+
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form', 'jquery', 'layer'], function () {
+        var form = layui.form;
+        var jquery = layui.jquery;
+        var layer = layui.layer;
+
+        //监听提交
+        form.on('submit(submit_create_course)', function (data) {
+            // layer.msg(JSON.stringify(data.field));
+            jquery.ajax({
+                type: "POST",
+                url: "/course/add",
+                async: false,
+                // contentType: 'application/json',
+                // data: JSON.stringify(data.field),
+                data: data.field,
+                success: function (res) {
+                    if (res.code === 200) {
+                        layer.msg(res.msg);
+                        // setTimeout(function () {
+                        //     window.location.replace('/index')
+                        // }, 1500)
+
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                },
+                error: function (err) {
+                    console.log("err", err)
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
