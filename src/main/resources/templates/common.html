@@ -15,7 +15,7 @@
 <div th:fragment="nav">
     <div style="background-color:#393D49;">
         <ul class="layui-nav" lay-filter="nav">
-            <li class="layui-nav-item"><a th:href="@{/}">选课管理系统</a></li>
+            <li class="layui-nav-item"><a th:href="@{#}">选课管理系统</a></li>
             <li class="layui-nav-item" style="float: right;margin-right: 10px;">
                 <a href="javascript:;">[[${name}]] [[${role==0?'【管理员】':role==1?'【教师端】':'【学生端】'}]]</a>
                 <dl class="layui-nav-child"> <!-- 二级菜单 -->
@@ -63,7 +63,7 @@
                 </div>
             </li>
 
-            <li class="layui-menu-item-divider"></li>
+            <!--<li class="layui-menu-item-divider"></li>-->
 
             <!--管理员 学生选课情况================================-->
             <div th:if="${role==0}">
@@ -79,10 +79,6 @@
                 </li>
             </div>
             <!--===================================================-->
-
-            <li lay-options="{id: 102}">
-                <div class="layui-menu-body-title">menu item 3</div>
-            </li>
         </ul>
     </div>
 </div>

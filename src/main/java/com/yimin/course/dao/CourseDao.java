@@ -19,6 +19,11 @@ import java.util.Map;
 public interface CourseDao {
 
     /**
+     * 由课程id查询其剩余量
+     */
+    int selectRemain(Long id);
+
+    /**
      * 由教师id查询所有创建的课程
      */
     List<Course> selectMyCreate(Long id);

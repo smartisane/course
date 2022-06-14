@@ -29,4 +29,6 @@ public interface CourseService {
 
     Course getCourseById(Long id);
 
+    int getCourseRemain(Long id);
+
 }

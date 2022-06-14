@@ -41,7 +41,7 @@ public class CourseController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("/my")
+    @PostMapping("/my")
     public Map<String, Object> getAllMyCourse(Long id, Integer role, @RequestParam(required = false, defaultValue = "1") Integer currPage, @RequestParam(required = false, defaultValue = "6") Integer pageSize) {
         PageHelper.startPage(currPage, pageSize);
         List<Course> courses;
@@ -173,6 +173,32 @@ public class CourseController {
         result.put("data", resultCourse);
         return result;
     }
+
+
+
+    /**
+     * 学生 我的课程接口
+     *
+     */
+    // @PostMapping("/my")
+    // public Map<String, Object> getStuCourse(Long id, @RequestParam(required = false, defaultValue = "1") Integer currPage, @RequestParam(required = false, defaultValue = "6") Integer pageSize) {
+    //     PageHelper.startPage(currPage, pageSize);
+    //     List<Course> courses;
+    //     courses = courseService.getAllMyCourse(id, currPage, pageSize);
+    //     PageInfo<Course> pageInfo = new PageInfo<>(courses);
+    //     //layui表格要求返回的格式
+    //     log.info(String.valueOf(pageInfo.getTotal()));
+    //     System.out.println("pageInfo.getList() = " + pageInfo.getList());
+    //
+    //     //layui表格要求返回的格式
+    //     Map<String, Object> map = new HashMap<>();
+    //     map.put("code", 0);
+    //     map.put("msg", "");
+    //     map.put("count", pageInfo.getPageNum());
+    //     map.put("data", pageInfo.getList());
+    //     return map;
+    // }
+
 
 
 }

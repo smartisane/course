@@ -39,6 +39,9 @@ public class StudentCourseController {
      */
     @PostMapping("/choose")
     public Result chooseCourse(StudentCourse studentCourse) {
+        if(courseService.getCourseRemain(studentCourse.getCourseId())<=0){
+            return Result.error("选课失败，该课程容量不足");
+        }
         studentCourseService.isAlreadyChoose(studentCourse);
         studentCourseService.insert(studentCourse);
         //课程choose+1

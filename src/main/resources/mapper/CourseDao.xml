@@ -71,6 +71,10 @@
     <select id="selectCourseById" resultMap="CourseMap">
         select * from course.t_course where id=#{id}
     </select>
+    <!--由课程id查询其剩余量-->
+    <select id="selectRemain" resultType="java.lang.Integer">
+        select (total-choose) from course.t_course where id=#{id}
+    </select>
 
 </mapper>
 

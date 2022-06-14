@@ -58,4 +58,9 @@ public class CourseServiceImpl implements CourseService {
     public Course getCourseById(Long id) {
         return courseDao.selectCourseById(id);
     }
+
+    @Override
+    public int getCourseRemain(Long id) {
+        return courseDao.selectRemain(id);
+    }
 }

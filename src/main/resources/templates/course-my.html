@@ -22,6 +22,9 @@
                 <a id="options" class="layui-btn layui-btn-xs" lay-event="more">操作 <i
                         class="layui-icon layui-icon-down"></i></a>
             </script>
+            <script type="text/html" id="bar2">
+                <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="withdraw">退课</a>
+            </script>
         </div>
     </div>
 </div>
@@ -42,39 +45,79 @@
             });
         })
 
-        table.render({
-            elem: '#table_course'
-            // , height: 312
-            , url: '/course/my' //数据接口
-            , page: true //开启分页
-            , limit: 6
-            , where: {id: [[${id}]],role:[[${role}]]}
-            , request: {
-                pageName: 'currPage' //页码的参数名称，默认：page
-                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
-            }
-            , loading: true
-            , title: '我创建的课程'
-            , cols: [[ //表头
-                {field: 'id', title: 'ID', hide: true}
-                , {field: 'name', title: '课程名', width: 200}
-                , {field: 'type', title: '课程类型', width: 90}
-                , {
-                    field: 'createTime',
-                    title: '创建时间',
-                    width: 120,
-                    templet: function (d) {
-                        return util.toDateString(d.createTime, "yyyy-MM-dd");
-                    }
+        if([[${role}]]==0 || [[${role}]]==1){
+            table.render({
+                elem: '#table_course'
+                // , height: 312
+                , url: '/course/my' //数据接口
+                , method: 'post'
+                , page: true //开启分页
+                , limit: 6
+                , where: {id: [[${id}]],role:[[${role}]]}
+                , request: {
+                    pageName: 'currPage' //页码的参数名称，默认：page
+                    , limitName: 'pageSize' //每页数据量的参数名，默认：limit
                 }
-                , {field: 'total', title: '限选人数', width: 90}
-                , {field: 'choose', title: '已选人数', width: 90}
-                , {field: 'classroom', title: '教室', width: 90}
-                , {field: 'week', title: '星期', width: 70}
-                , {field: 'section', title: '节次', width: 70}
-                , {field: 'option', title: '操作', toolbar: '#bar'}
-            ]]
-        });
+                , loading: true
+                , cols: [[ //表头
+                    {field: 'id', title: 'ID', hide: true}
+                    , {field: 'name', title: '课程名', width: 200}
+                    , {field: 'type', title: '课程类型', width: 90}
+                    , {
+                        field: 'createTime',
+                        title: '创建时间',
+                        width: 120,
+                        templet: function (d) {
+                            return util.toDateString(d.createTime, "yyyy-MM-dd");
+                        }
+                    }
+                    , {field: 'total', title: '限选人数', width: 90}
+                    , {field: 'choose', title: '已选人数', width: 90}
+                    , {field: 'classroom', title: '教室', width: 90}
+                    , {field: 'week', title: '星期', width: 70}
+                    , {field: 'section', title: '节次', width: 70}
+                    , {field: 'option', title: '操作', toolbar: '#bar'}
+                ]]
+            });
+        }else {
+            //学生端显示
+            // ==========
+            table.render({
+                elem: '#table_course'
+                // , height: 312
+                , url: '/course/detail' //数据接口
+                , method: 'post'
+                , page: true //开启分页
+                , limit: 6
+                , where: {id: [[${id}]],role:[[${role}]]}
+                , request: {
+                    pageName: 'currPage' //页码的参数名称，默认：page
+                    , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , loading: true
+                , cols: [[ //表头
+                    {field: 'id', title: 'ID', hide: false}
+                    , {field: 'name', title: '课程名', width: 200}
+                    , {field: 'type', title: '课程类型', width: 90}
+                    // , {
+                    //     field: 'createTime',
+                    //     title: '创建时间',
+                    //     width: 120,
+                    //     templet: function (d) {
+                    //         return util.toDateString(d.createTime, "yyyy-MM-dd");
+                    //     }
+                    // }
+                    , {field: 'total', title: '限选人数', width: 90}
+                    , {field: 'choose', title: '已选人数', width: 90}
+                    , {field: 'classroom', title: '教室', width: 90}
+                    , {field: 'week', title: '星期', width: 70}
+                    , {field: 'section', title: '节次', width: 70}
+                    , {field: 'option', title: '操作', toolbar: '#bar2'}
+                ]]
+            });
+            // ===========
+        }
+
 
         //监听行工具事件
         table.on('tool(table_course)', function (obj) {
@@ -106,6 +149,37 @@
                     }
                     , align: 'right' //右对齐弹出（v2.6.8 新增）
                     , style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' //设置额外样式
+                });
+            }else if(obj.event === 'withdraw'){
+                // layer.msg("退课")
+                layer.confirm('确认退课?', {icon: 3, title: '提示'}, function (index) {
+                    // ajax begin=============
+                    jquery.ajax({
+                        type: "POST",
+                        url: "/studentCourse/withdraw",
+                        async: false,
+                        // contentType: 'application/json',
+                        // data: JSON.stringify(data.field),
+                        data: {
+                            courseId: data.id,//课程id
+                            studentId: [[${id}]]//学生id
+                        },
+                        success: function (res) {
+                            if (res.code === 200) {
+                                layer.msg(res.msg);
+                                setTimeout(function () {
+                                    window.location.reload()
+                                }, 1500)
+                            } else {
+                                layer.msg(res.msg);
+                            }
+                        },
+                        error: function (err) {
+                            console.log("err", err)
+                        }
+                    });
+                    // ajax end==================
+                    layer.close(index);
                 });
             }
         });

@@ -20,7 +20,7 @@
     </select>
 
     <!--学生选课情况-->
-    <!--注意这里的t_student_course.course_id，不要写错了，出bug找了半天-->
+    <!--注意这里的t_student_course.course_id，不要写错了-->
     <select id="getCourse" resultType="com.yimin.course.entity.Course">
         select t_student_course.course_id id from t_student_course where student_id = #{id}
     </select>

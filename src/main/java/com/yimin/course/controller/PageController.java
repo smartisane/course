@@ -23,7 +23,7 @@ public class PageController {
     private StringRedisTemplate stringRedisTemplate;
 
 
-    @GetMapping(value = {"/","/index","/course/my"})
+    @GetMapping(value = {"/course/my"})
     public String indexPage(Model model, HttpSession session){
         String token = (String) session.getAttribute("token");
         DecodedJWT jwt = JWTUtils.verify(token);
@@ -37,7 +37,7 @@ public class PageController {
         model.addAttribute("role",role);
         model.addAttribute("id",id);
         model.addAttribute("isMyMenu",true);
-        return "index";
+        return "course-my";
     }
 
     @GetMapping("/login")
